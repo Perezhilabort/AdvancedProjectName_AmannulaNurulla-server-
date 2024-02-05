@@ -2,9 +2,9 @@ const {Sequelize} = require('sequelize');
 require('dotenv').config();
 
 const sequelize = new Sequelize(process.env.DB_NAME, process.env.DB_USER,  process.env.DB_PASSWORD, {
-    host: 'containers-us-west-183.railway.app',
+    host: process.env.DB_HOST,
     dialect: 'postgres',
-    port: "7841",
+    port: process.env.DB_PORT,
     define: {
         charset: 'utf-8',
         collate: 'utf8_general_ci'
