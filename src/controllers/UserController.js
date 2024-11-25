@@ -41,17 +41,19 @@ const loginUser = async (req,res) => {
             return res.json({message: "Пользватель с таким логином и паролем не найден!"})
         }
 
-        if(user.devices !== null && user.devices.length === 2 && !user.devices.includes(params.ip)){
-            return false;
-        }  
-        else {
-            if(user.devices === null || !user.devices.includes(params.ip)) {
-                user.devices = user.devices === null ? [] : user.devices;
-                await UserModel.update({
-                    devices: [...user.devices, params.ip]
-                },
-                {where: {name: params.name}});
-            }
+        if (user.devices === null || !Array.isArray(user.devices)) {
+            user.devices = [];
+        }
+        
+        if (user.devices.length === 2 && !user.devices.includes(params.ip)) {
+            return res.json({message: "Не допускается использвать больше двух устроиств!"})
+        }
+        
+        if (!user.devices.includes(params.ip)) {
+            await UserModel.update(
+                { devices: [...user.devices, params.ip] },
+                { where: { name: params.name } }
+            );
         }
         const token = jwt.sign({
             id: user.id,
