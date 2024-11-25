@@ -26,44 +26,33 @@ const createUser = async (req,res) => {
 }
 
 
-
+// Максимум должно быть два известных девайса
+// 1. Чел логинится первый раз с первым девайсом и все ок
+// 2. Чел логинится со второго девайса и все ок
+// 3. Чел логинится уже со известного девайса и все ок
+// 4. Все девайсы переполнены и новый девайс не соотвествует существующим
 const loginUser = async (req,res) => {
     try {
         const params = req.body;
         const user = await UserModel.findOne({
             where: {name: params.name}
         })
-        if(!user){
-            return res.json({message: "Пользватель не найден!"})
+        if(!user && params.password !== user.password){
+            return res.json({message: "Пользватель с таким логином и паролем не найден!"})
         }
-        if(params.password !== user.password){
-            return res.json({message: "Неверный пароль"})
-        }
-        const deviceArr = [];
-        if(user.devices && !user.devices.includes(req.body.ip) && !user.isAdmin){
-            deviceArr.push(req.body.ip)
-            for (let i = 0; i < user.devices.length; i++) {
-                deviceArr.push(user.devices[i]);
+
+        if(user.devices !== null && user.devices.length === 2 && !user.devices.includes(params.ip)){
+            return false;
+        }  
+        else {
+            if(user.devices === null || !user.devices.includes(params.ip)) {
+                user.devices = user.devices === null ? [] : user.devices;
+                await UserModel.update({
+                    devices: [...user.devices, params.ip]
+                },
+                {where: {name: params.name}});
             }
-            await UserModel.update({
-                devices: deviceArr
-            },
-            {where: {name: params.name}, returning:true, plain:true} ).then((async (result) => {
-                // console.log(result[1].devices)
-                if(result[1].devices.length > 2){
-                    throw new Error("Слишком много устройств");
-                }
-            }))
         }
-
-        if(!user.devices){
-            deviceArr.push(req.body.ip);
-            await UserModel.update({
-                devices:deviceArr
-            },
-            {where: {name: params.name, password: params.password}, returning: true, plain:true})
-       }
-
         const token = jwt.sign({
             id: user.id,
             isAdmin: user.isAdmin,
@@ -78,7 +67,6 @@ const loginUser = async (req,res) => {
         console.log('Ошибка с логином', error);
     }
 }
-
 
 const deleteUser = async (req,res) => {
     try {

@@ -15,7 +15,6 @@ app.use(express.static('static'))
 
 app.use('/user', userRouter);
 app.use('/admin', adminRouter);
-
 const server = app.listen(process.env.PORT,async () => {
     try {
         await sequelize.authenticate();
