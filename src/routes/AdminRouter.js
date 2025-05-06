@@ -6,17 +6,6 @@ const {createCourse,getUsersByCourse,addUserToCourse, addVideoToCourse, deleteVi
 const isAdminMiddleware = require('../middlewares/isAdmin');
 const multer = require('multer')
 
-const MegaStorage = require('../../Storage/megaStorage');
-const megaStorage = new MegaStorage({
-    email:process.env.MEGA_EMAIL,
-    password: process.env.MEGA_PASSWORD
-})
-
-const upload = multer({
-    megaStorage
-})
-
-
 const router = new Router();
 
 router.get('/courses', isAdminMiddleware, getAllCourses);
@@ -26,7 +15,6 @@ router.get('/users/:id', isAdminMiddleware, getUsersByCourse)
 router.get('/videos/:id', isAdminMiddleware, getVideosFromCourse)
 
 router.post('/createUser',isAdminMiddleware, createUser);
-router.post('/uploadFile', isAdminMiddleware, upload.single('video'), uploadFile);
 router.post('/createCourse', isAdminMiddleware, createCourse);
 router.post('/createVideo', isAdminMiddleware, createVideo);
 

@@ -9,8 +9,4 @@ const router = new Router();
 router.use('/courses', courseRouter);
 
 router.post('/login', loginUser)
-// router.get('/courses',authMiddleware ,getCoursesById);
-
-
-
 module.exports = router;
